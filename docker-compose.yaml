@@ -1,0 +1,38 @@
+---
+version: '3.7'
+services:
+    nginx:
+      container_name: nginx
+      image: nginx:latest
+      volumes:
+      - type: bind
+        source: ./nginx/nginx.conf
+        target: /etc/nginx/nginx.conf
+      ports:
+      - target: 80
+        published: 81
+        protocol: tcp
+      depends_on:
+        - client
+    client:
+      build:
+        context: ./client
+        dockerfile: Dockerfile
+      image: 127.0.0.1:4999/client
+    dataapi:
+      build:
+        context: ./dataapi
+        dockerfile: Dockerfile
+      image: 127.0.0.1:4999/dataapi
+    mysql:
+      image: mysql:5.7
+      volumes:
+        - ./mysql/create.sql:/docker-entrypoint-initdb.d/create.sql
+        - ./mysql/data.sql:/docker-entrypoint-initdb.d/data.sql
+      command: --default-authentication-plugin=mysql_native_password
+      restart: always
+      environment:
+        MYSQL_ROOT_PASSWORD: admin
+...
+
+
